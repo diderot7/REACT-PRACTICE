@@ -3,6 +3,7 @@ import { useRef, useState } from "react";
 import "./App.css";
 import DiaryEditor from "./DiaryEditor";
 import DiaryList from "./DiaryList";
+import Lifecycle from "./Lifecycle";
 
 function App() {
   // const dummyList = [
@@ -31,7 +32,7 @@ function App() {
 
   const [data, setData] = useState([]);
 
-  const dataId = useRef(0);
+  const dataId = useRef(1);
   const onCreate = (author, content, emotion) => {
     const created_date = new Date().getTime();
     const newItem = {
@@ -44,14 +45,24 @@ function App() {
     dataId.current += 1;
     setData([newItem, ...data]);
   };
-  const onDelete = (id) => {
-    let filterDiary = data.filter((it) => it.id !== id);
+  const onDelete = (targetId) => {
+    let filterDiary = data.filter((it) => it.id !== targetId);
     setData(filterDiary);
   };
+
+  const onEdit = (targetId, newContent) => {
+    setData(
+      data.map((it) =>
+        it.id === targetId ? { ...it, content: newContent } : it
+      )
+    );
+  };
+
   return (
     <div className="App">
+      <Lifecycle />
       <DiaryEditor onCreate={onCreate} />
-      <DiaryList diaryList={data} onDelete={onDelete} />
+      <DiaryList diaryList={data} onDelete={onDelete} onEdit={onEdit} />
     </div>
   );
 }
