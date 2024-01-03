@@ -14,7 +14,7 @@ const DiaryItem = ({
   const toggleIsEdit = () => setIsEdit(!isEdit);
   const [localContent, setLocalContent] = useState(content);
 
-  console.log(isEdit);
+  // console.log(isEdit);
   const handleRemove = () => {
     // 일기 데이터를 삭제하는 함수
     if (window.confirm(`${id}번째 일기를 정말 삭제하시겠습니까?`)) {

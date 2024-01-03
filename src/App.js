@@ -8,6 +8,8 @@ import Login from "./Login";
 import Logout from "./Logout";
 import Title from "./Title";
 
+//https://jsonplaceholder.typicode.com/comments
+
 const App = () => {
   // const dummyList = [
   //   {
@@ -32,19 +34,17 @@ const App = () => {
   //     created_date: new Date().getTime(),
   //   },
   // ];
+
+  // 로그인 구현
   const [isLogin, setIsLogin] = useState(false);
   const toggleIsLogin = () => setIsLogin(!isLogin);
 
   const OnLogin = (loginObj) => {
     localStorage.setItem("loginInfo", JSON.stringify(loginObj));
-    // const LoginInfo = JSON.parse(localStorage.getItem("loginInfo"));
+
     toggleIsLogin();
   };
   let LoginInfostring = JSON.parse(localStorage.getItem("loginInfo"));
-
-  // const LoginId = LoginInfos["id"] ? LoginInfos["id"] : undefined;
-
-  // console.log(LoginInfos["id"]);
 
   useEffect(() => {
     const LoginInfo = JSON.parse(localStorage.getItem("loginInfo"));
@@ -53,22 +53,32 @@ const App = () => {
       toggleIsLogin();
     }
   }, []);
-  // const LoginJungbo = () => {
-  // const LoginInfo = JSON.parse(localStorage.getItem("loginInfo"));
-  //   return LoginInfo.id;
-  // };
-
-  // console.log(LoginJungbo());
-  // console.log(LoginInfo.id !== "");
   const onLogout = () => {
     localStorage.removeItem("loginInfo");
-    // LoginInfo = "";
-    // LoginId = "";
 
     toggleIsLogin();
   };
 
-  // console.log(LoginInfo, LoginId);
+  const getData = async () => {
+    const res = await fetch(
+      "https://jsonplaceholder.typicode.com/comments"
+    ).then((res) => res.json());
+
+    const initData = res.slice(0, 20).map((it) => {
+      return {
+        author: it.email,
+        content: it.body,
+        emotion: Math.floor(Math.random() * 5) + 1,
+        created_date: new Date().getTime(),
+        id: dataId.current++,
+      };
+    });
+
+    setData(initData);
+  };
+  useEffect(() => {
+    getData();
+  }, []);
 
   const [data, setData] = useState([]);
 
