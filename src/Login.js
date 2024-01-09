@@ -1,4 +1,4 @@
-const Login = ({ onLogout, LoginInfostring }) => {
+const Login = ({ onLogout, memberData }) => {
   // console.log(LoginInfo);
   const onLogoutSubmit = () => {
     onLogout();
@@ -6,7 +6,7 @@ const Login = ({ onLogout, LoginInfostring }) => {
   return (
     <div>
       <div>
-        {LoginInfostring && `${LoginInfostring.id}님 환영합니다`}
+        {memberData && `${memberData.id}님 환영합니다`}
         <button onClick={onLogoutSubmit}>로그아웃</button>
       </div>
     </div>
@@ -14,7 +14,7 @@ const Login = ({ onLogout, LoginInfostring }) => {
 };
 
 Login.defaultProps = {
-  LoginInfostring: null,
+  memberData: null,
 };
 // Login.defaultProps = {
 //   LoginJungbo: {},

@@ -11,6 +11,7 @@ import Title from "./Title";
 //https://jsonplaceholder.typicode.com/comments
 
 const App = () => {
+  const [data, setData] = useState([]);
   // const dummyList = [
   //   {
   //     id: 1,
@@ -38,14 +39,17 @@ const App = () => {
   // 로그인 구현
   const [isLogin, setIsLogin] = useState(false);
   const toggleIsLogin = () => setIsLogin(!isLogin);
+  const memberData = JSON.parse(localStorage.getItem("loginInfo"));
 
   const OnLogin = (loginObj) => {
+    // 로그인을 했을 때 만약 똑같은 아이디가 있다면 data에 값을 넣는거지.
+
     localStorage.setItem("loginInfo", JSON.stringify(loginObj));
 
     toggleIsLogin();
   };
-  let LoginInfostring = JSON.parse(localStorage.getItem("loginInfo"));
-
+  console.log(data);
+  // const memberData = JSON.parse(localStorage.getItem("loginInfo"));
   useEffect(() => {
     const LoginInfo = JSON.parse(localStorage.getItem("loginInfo"));
 
@@ -59,41 +63,46 @@ const App = () => {
     toggleIsLogin();
   };
 
-  const getData = async () => {
-    const res = await fetch(
-      "https://jsonplaceholder.typicode.com/comments"
-    ).then((res) => res.json());
+  // const getData = async () => {
+  //   const res = await fetch(
+  //     "https://jsonplaceholder.typicode.com/comments"
+  //   ).then((res) => res.json());
 
-    const initData = res.slice(0, 20).map((it) => {
-      return {
-        author: it.email,
-        content: it.body,
-        emotion: Math.floor(Math.random() * 5) + 1,
-        created_date: new Date().getTime(),
-        id: dataId.current++,
-      };
-    });
+  //   const initData = res.slice(0, 20).map((it) => {
+  //     return {
+  //       author: it.email,
+  //       content: it.body,
+  //       emotion: Math.floor(Math.random() * 5) + 1,
+  //       created_date: new Date().getTime(),
+  //       id: dataId.current++,
+  //     };
+  //   });
 
-    setData(initData);
-  };
-  useEffect(() => {
-    getData();
-  }, []);
+  //   setData(initData);
+  // };
+  // useEffect(() => {
+  //   getData();
+  // }, []);
 
-  const [data, setData] = useState([]);
-
+  // console.log(data);
   const dataId = useRef(1);
-  const onCreate = (author, content, emotion) => {
-    const created_date = new Date().getTime();
+  const onCreate = (content, emotion) => {
+    const create_date = new Date().getTime();
+    const name = memberData.id;
     const newItem = {
-      author,
+      Nickname: name,
       content,
       emotion,
-      created_date,
+      create_date,
       id: dataId.current,
     };
     dataId.current += 1;
+
     setData([newItem, ...data]);
+    const dataArray = JSON.parse(localStorage.getItem("loginInfo")) || [];
+    dataArray.content.push(newItem);
+    console.log(dataArray);
+    localStorage.setItem("loginInfo", JSON.stringify(dataArray));
   };
   const onDelete = (targetId) => {
     let filterDiary = data.filter((it) => it.id !== targetId);
@@ -111,13 +120,15 @@ const App = () => {
   return (
     <div className="App">
       <Title />
-      {/* <Lifecycle /> */}
+
       {isLogin && (
-        <Login onLogout={onLogout} LoginInfostring={LoginInfostring} />
+        <>
+          <Login onLogout={onLogout} memberData={memberData} />
+          <DiaryEditor onCreate={onCreate} />
+          <DiaryList data={data} onDelete={onDelete} onEdit={onEdit} />
+        </>
       )}
       {!isLogin && <Logout OnLogin={OnLogin} />}
-      <DiaryEditor onCreate={onCreate} />
-      <DiaryList diaryList={data} onDelete={onDelete} onEdit={onEdit} />
     </div>
   );
 };

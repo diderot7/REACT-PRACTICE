@@ -2,17 +2,21 @@
 import { useRef, useState } from "react";
 
 const DiaryItem = ({
-  author,
+  // author,
   content,
   emotion,
-  created_date,
+  create_date,
   onDelete,
   id,
+  Nickname,
+  data,
   onEdit,
 }) => {
+  // console.log(emotion, created_date, id, data, data.id, data.content);
+  // console.log(data);
   const [isEdit, setIsEdit] = useState(false);
   const toggleIsEdit = () => setIsEdit(!isEdit);
-  const [localContent, setLocalContent] = useState(content);
+  const [localContent, setLocalContent] = useState(undefined && data.content);
 
   // console.log(isEdit);
   const handleRemove = () => {
@@ -47,12 +51,12 @@ const DiaryItem = ({
     <div className="DiaryItem">
       <div className="info">
         <span>
-          작성자 : {author} | 감정 : {emotion}
+          작성자 : {Nickname} | 감정 : {emotion}
         </span>
 
         <br />
         <span className="date">
-          작성시간 : {new Date(created_date).toLocaleString()}
+          작성시간 : {new Date(create_date).toLocaleString()}
         </span>
       </div>
       <div className="content">
@@ -82,6 +86,10 @@ const DiaryItem = ({
       )}
     </div>
   );
+};
+
+DiaryItem.defaultProps = {
+  data: {},
 };
 
 export default DiaryItem;
