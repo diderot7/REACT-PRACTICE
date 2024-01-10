@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useMemo } from "react";
 
 import "./App.css";
 import DiaryEditor from "./DiaryEditor";
@@ -7,34 +7,12 @@ import DiaryList from "./DiaryList";
 import Login from "./Login";
 import Logout from "./Logout";
 import Title from "./Title";
+import OptimizeTest2 from "./OptimizeTest2";
 
 //https://jsonplaceholder.typicode.com/comments
 
 const App = () => {
   const [data, setData] = useState([]);
-  // const dummyList = [
-  //   {
-  //     id: 1,
-  //     author: "이정환",
-  //     content: "하이1",
-  //     emotion: 5,
-  //     created_date: new Date().getTime(),
-  //   },
-  //   {
-  //     id: 2,
-  //     author: "이정환",
-  //     content: "하이2",
-  //     emotion: 5,
-  //     created_date: new Date().getTime(),
-  //   },
-  //   {
-  //     id: 3,
-  //     author: "이정환",
-  //     content: "하이3",
-  //     emotion: 5,
-  //     created_date: new Date().getTime(),
-  //   },
-  // ];
 
   // 로그인 구현
   const [isLogin, setIsLogin] = useState(false);
@@ -50,39 +28,39 @@ const App = () => {
   };
   console.log(data);
   // const memberData = JSON.parse(localStorage.getItem("loginInfo"));
-  useEffect(() => {
-    const LoginInfo = JSON.parse(localStorage.getItem("loginInfo"));
+  // useEffect(() => {
+  //   const LoginInfo = JSON.parse(localStorage.getItem("loginInfo"));
 
-    if (LoginInfo) {
-      toggleIsLogin();
-    }
-  }, []);
+  //   if (LoginInfo) {
+  //     toggleIsLogin();
+  //   }
+  // }, []);
   const onLogout = () => {
     localStorage.removeItem("loginInfo");
 
     toggleIsLogin();
   };
 
-  // const getData = async () => {
-  //   const res = await fetch(
-  //     "https://jsonplaceholder.typicode.com/comments"
-  //   ).then((res) => res.json());
+  const getData = async () => {
+    const res = await fetch(
+      "https://jsonplaceholder.typicode.com/comments"
+    ).then((res) => res.json());
 
-  //   const initData = res.slice(0, 20).map((it) => {
-  //     return {
-  //       author: it.email,
-  //       content: it.body,
-  //       emotion: Math.floor(Math.random() * 5) + 1,
-  //       created_date: new Date().getTime(),
-  //       id: dataId.current++,
-  //     };
-  //   });
+    const initData = res.slice(0, 20).map((it) => {
+      return {
+        author: it.email,
+        content: it.body,
+        emotion: Math.floor(Math.random() * 5) + 1,
+        created_date: new Date().getTime(),
+        id: dataId.current++,
+      };
+    });
 
-  //   setData(initData);
-  // };
-  // useEffect(() => {
-  //   getData();
-  // }, []);
+    setData(initData);
+  };
+  useEffect(() => {
+    getData();
+  }, []);
 
   // console.log(data);
   const dataId = useRef(1);
@@ -117,14 +95,31 @@ const App = () => {
     );
   };
 
+  const getDiaryAnalysis = useMemo(() => {
+    const goodCount = data.filter((it) => it.emotion >= 3).length;
+    const badCount = data.length - goodCount;
+    const goodRatio = (goodCount / data.length) * 100;
+    return { goodCount, badCount, goodRatio };
+  }, [data.length]);
+  // usememo는 값을 기억해서 dependency array (위 함수에서는 [data.length]자리)가 변하지 않으면 리랜더 안됌
+
+  const { goodCount, badCount, goodRatio } = getDiaryAnalysis;
+  // 구조분해할당으로 위 getDiaryAnalysis() 이렇게 불러야하지만 useMemo를 쓰면 그 함수는 값이기 떄문에 ()를 붙이지 않는다. 내가 생각할때는 return 콜백함수가 있어서 그렇다. 원래 함수는 undefined값을 가지지만 return값을 가졌기 때문에 ()을 안붙이는듯
+
   return (
     <div className="App">
+      <OptimizeTest2 />
       <Title />
 
       {isLogin && (
         <>
           <Login onLogout={onLogout} memberData={memberData} />
+
           <DiaryEditor onCreate={onCreate} />
+          <div>전체 일기 : {data.length} </div>
+          <div>기분 좋은 일기 개수 : {goodCount} </div>
+          <div>기분 나쁜 일기 개수 : {badCount} </div>
+          <div>기분 좋은 일기 비율 : {goodRatio}</div>
           <DiaryList data={data} onDelete={onDelete} onEdit={onEdit} />
         </>
       )}
