@@ -11,7 +11,7 @@ import Title from "./Title";
 //https://jsonplaceholder.typicode.com/comments
 
 const App = () => {
-  const [data, setData] = useState();
+  const [data, setData] = useState({});
   const [userId, SetUserId] = useState("");
   // 로그인 구현
 
@@ -24,7 +24,7 @@ const App = () => {
       //(loginObj.id === JSON.parse(localStorage.getItem(loginObj.id)))
       const memberDatas = JSON.parse(localStorage.getItem(LoginId)).contents;
       // memberData컨텐츠가 없으면 빈배열 리턴, 있으면 컨텐츠 리턴
-      setData(memberDatas.length > 1 ? memberDatas : []);
+      setData(memberDatas.length >= 1 ? memberDatas : []);
       SetUserId(LoginId);
       toggleIsLogin();
 
@@ -39,7 +39,7 @@ const App = () => {
     console.log("실행");
     return;
   };
-
+  console.log(data);
   console.log(userId);
   const [isLogin, setIsLogin] = useState(false);
   const toggleIsLogin = () => {
