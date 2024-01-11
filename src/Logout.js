@@ -4,7 +4,7 @@ const Logout = ({ OnLogin }) => {
   const [state, setState] = useState({
     id: "",
     password: "",
-    content: [],
+    contents: [],
   });
   const handleChangeLogin = (e) => {
     setState({

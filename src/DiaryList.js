@@ -16,7 +16,7 @@ const DiaryList = ({ data, onDelete, onEdit }) => {
 };
 
 DiaryList.defaultProps = {
-  diaryList: [],
+  data: [],
 };
 
 export default DiaryList;
