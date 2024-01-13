@@ -1,17 +1,20 @@
 // import userEvent from "@testing-library/user-event";
-import { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 const DiaryItem = ({
   // author,
   content,
   emotion,
-  create_date,
+  created_date,
   onDelete,
   id,
   Nickname,
   data,
   onEdit,
 }) => {
+  useEffect(() => {
+    console.log(`${id}번 째 아이템 렌더`);
+  });
   // console.log(emotion, created_date, id, data, data.id, data.content);
   // console.log(data);
   const [isEdit, setIsEdit] = useState(false);
@@ -56,7 +59,7 @@ const DiaryItem = ({
 
         <br />
         <span className="date">
-          작성시간 : {new Date(create_date).toLocaleString()}
+          작성시간 : {new Date(created_date).toLocaleString()}
         </span>
       </div>
       <div className="content">
@@ -92,4 +95,4 @@ DiaryItem.defaultProps = {
   data: {},
 };
 
-export default DiaryItem;
+export default React.memo(DiaryItem);

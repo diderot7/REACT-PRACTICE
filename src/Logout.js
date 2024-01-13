@@ -13,11 +13,23 @@ const Logout = ({ OnLogin }) => {
     });
   };
   const LoginSubmit = () => {
+    // 비밀번호 영어로만 입력 가능 구현
+    const EnglishPattern = /^[a-zA-Z]+$/;
+    if (EnglishPattern.test(state.password) === false) {
+      // 티스토리 기록
+      alert("한글, 숫자 금지");
+      setState({
+        id: "",
+        password: "",
+        contents: [],
+      });
+      return;
+    }
     OnLogin(state);
   };
 
   return (
-    <div>
+    <div className="Logout">
       <div>
         <input
           placeholder="닉네임"
@@ -28,6 +40,7 @@ const Logout = ({ OnLogin }) => {
       </div>
       <div>
         <input
+          type="password"
           placeholder="비밀번호"
           name="password"
           value={state.password}
