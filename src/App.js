@@ -14,10 +14,10 @@ import Logout from "./Logout";
 import Title from "./Title";
 
 const reducer = (state, action) => {
+  console.log(state, action);
   switch (action.type) {
     case "OnLogin": {
       const { id, password } = action.data;
-      console.log(id, password);
       const LoginData = JSON.parse(localStorage.getItem(id));
       if (LoginData) {
         if (LoginData.password === password) {
@@ -81,7 +81,7 @@ const reducer = (state, action) => {
     case "IdInfo": {
       return {
         ...state,
-        datainfo: action.data,
+        isLogin: true,
       };
     }
     case "toggleLogin": {
@@ -91,8 +91,8 @@ const reducer = (state, action) => {
       };
     }
 
-    default:
-      return state;
+    // default:
+    //   return state;
   }
 };
 
@@ -105,21 +105,22 @@ const App = () => {
     userId: "",
     isLogin: false,
   });
-  console.log(data);
 
   // 로그인 구현
-
+  // const user = useMemo(() => {
+  //   return { ...data };
+  // }, [data.datainfo]);
   const OnLogin = (loginObj) => {
     dispatch({ type: "OnLogin", data: loginObj });
   };
-
+  const getIdate = JSON.parse(localStorage.getItem(data));
+  console.log(data);
   useEffect(() => {
-    const IdInfo = JSON.parse(localStorage.getItem(data.userId));
-    console.log(IdInfo);
-    if (IdInfo !== null) {
-      dispatch({ type: "IdInfo", data: IdInfo.contents });
+    if (data) {
+      dispatch({ type: "IdInfo" });
+      console.log("실행");
     }
-  }, [dispatch]);
+  }, []);
 
   const onLogout = () => {
     dispatch({ type: "toggleLogin" });
