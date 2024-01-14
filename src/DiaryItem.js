@@ -1,22 +1,10 @@
 // import userEvent from "@testing-library/user-event";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
+import { DiaryDispatchContext } from "./App";
 
-const DiaryItem = ({
-  // author,
-  content,
-  emotion,
-  created_date,
-  onDelete,
-  id,
-  Nickname,
-  data,
-  onEdit,
-}) => {
-  useEffect(() => {
-    console.log(`${id}번 째 아이템 렌더`);
-  });
-  // console.log(emotion, created_date, id, data, data.id, data.content);
-  // console.log(data);
+const DiaryItem = ({ content, emotion, created_date, id, Nickname, data }) => {
+  const { onEdit, onDelete } = useContext(DiaryDispatchContext);
+
   const [isEdit, setIsEdit] = useState(false);
   const toggleIsEdit = () => setIsEdit(!isEdit);
   const [localContent, setLocalContent] = useState(undefined && data.content);

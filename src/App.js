@@ -1,15 +1,19 @@
-import { useRef, useEffect, useMemo, useCallback, useReducer } from "react";
+import React, {
+  useRef,
+  useEffect,
+  useMemo,
+  useCallback,
+  useReducer,
+} from "react";
 
 import "./App.css";
 import DiaryEditor from "./DiaryEditor";
 import DiaryList from "./DiaryList";
-// import Lifecycle from "./Lifecycle";
 import Login from "./Login";
 import Logout from "./Logout";
 import Title from "./Title";
 
 const reducer = (state, action) => {
-  console.log("액션실행", action, state);
   switch (action.type) {
     case "OnLogin": {
       const { id, password } = action.data;
@@ -22,7 +26,7 @@ const reducer = (state, action) => {
             ...state,
             datainfo: memberDatas ? memberDatas : [],
             userId: id,
-            isLogin: !state.isLogin,
+            isLogin: true,
           };
         } else {
           alert("비밀번호가 틀렸습니다.");
@@ -78,7 +82,6 @@ const reducer = (state, action) => {
       return {
         ...state,
         datainfo: action.data,
-        isLogin: true,
       };
     }
     case "toggleLogin": {
@@ -93,13 +96,17 @@ const reducer = (state, action) => {
   }
 };
 
+export const DiaryStateContext = React.createContext();
+export const DiaryDispatchContext = React.createContext();
+
 const App = () => {
   const [data, dispatch] = useReducer(reducer, {
     datainfo: [],
     userId: "",
     isLogin: false,
   });
-  console.log(data.userId, data.isLogin);
+  console.log(data);
+
   // 로그인 구현
 
   const OnLogin = (loginObj) => {
@@ -112,7 +119,7 @@ const App = () => {
     if (IdInfo !== null) {
       dispatch({ type: "IdInfo", data: IdInfo.contents });
     }
-  }, []);
+  }, [dispatch]);
 
   const onLogout = () => {
     dispatch({ type: "toggleLogin" });
@@ -139,36 +146,43 @@ const App = () => {
     });
   }, []);
 
+  const memoizedDispatches = useMemo(() => {
+    return { onCreate, onDelete, onEdit, onLogout, OnLogin };
+  }, []);
+
   const getDiaryAnalysis = useMemo(() => {
     if (!data.datainfo) {
       return null;
     }
     const goodCount = data.datainfo.filter((it) => it.emotion >= 3).length;
     const badCount = data.datainfo.length - goodCount;
-    const goodRatio = (goodCount / data.length) * 100;
+    const goodRatio = (goodCount / data.datainfo.length) * 100;
     return { goodCount, badCount, goodRatio };
   }, [data.datainfo]);
 
   const { goodCount, badCount, goodRatio } = getDiaryAnalysis || {};
 
   return (
-    <div className="App">
-      <Title />
+    <DiaryStateContext.Provider value={data}>
+      <DiaryDispatchContext.Provider value={memoizedDispatches}>
+        <div className="App">
+          <Title />
+          {data.isLogin && (
+            <>
+              <Login />
 
-      {data.isLogin && (
-        <>
-          <Login onLogout={onLogout} />
-
-          <DiaryEditor onCreate={onCreate} />
-          <div>전체 일기 : {data.length} </div>
-          <div>기분 좋은 일기 개수 : {goodCount} </div>
-          <div>기분 나쁜 일기 개수 : {badCount} </div>
-          <div>기분 좋은 일기 비율 : {goodRatio || 0}</div>
-          <DiaryList data={data.datainfo} onDelete={onDelete} onEdit={onEdit} />
-        </>
-      )}
-      {!data.isLogin && <Logout OnLogin={OnLogin} />}
-    </div>
+              <DiaryEditor />
+              <div>전체 일기 : {data.datainfo.length} </div>
+              <div>기분 좋은 일기 개수 : {goodCount} </div>
+              <div>기분 나쁜 일기 개수 : {badCount} </div>
+              <div>기분 좋은 일기 비율 : {goodRatio || 0}</div>
+              <DiaryList />
+            </>
+          )}
+          {!data.isLogin && <Logout />}
+        </div>
+      </DiaryDispatchContext.Provider>
+    </DiaryStateContext.Provider>
   );
 };
 

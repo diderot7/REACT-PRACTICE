@@ -1,6 +1,9 @@
-import { useState } from "react";
+import React, { useContext, useState } from "react";
+import { DiaryDispatchContext } from "./App";
 
-const Logout = ({ OnLogin }) => {
+const Logout = () => {
+  const { OnLogin } = useContext(DiaryDispatchContext);
+
   const [state, setState] = useState({
     id: "",
     password: "",
