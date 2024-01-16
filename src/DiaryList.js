@@ -12,7 +12,7 @@ const DiaryList = () => {
       <h2>일기 리스트</h2>
       <h4>{data.datainfo.length}개의 일기가 있습니다.</h4>
       <div>
-        {data.datainfo.map((it) => (
+        {data.datainfo.contents.map((it) => (
           <DiaryItem key={it.id} {...it} />
         ))}
       </div>

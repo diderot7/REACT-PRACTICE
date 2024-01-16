@@ -17,29 +17,72 @@ const reducer = (state, action) => {
   console.log(state, action);
   switch (action.type) {
     case "OnLogin": {
+      // localstorage 데이터가 1이상이면 push,
+      // 그게 아니라면 그냥 값 전다
       const { id, password } = action.data;
-      const LoginData = JSON.parse(localStorage.getItem(id));
-      if (LoginData) {
-        if (LoginData.password === password) {
-          const memberDatas = LoginData.contents;
-          return {
-            ...state,
-            datainfo: memberDatas ? memberDatas : [],
-            userId: id,
-            isLogin: true,
-          };
-        } else {
-          alert("비밀번호가 틀렸습니다.");
-          return state;
+      const LoginData = JSON.parse(localStorage.getItem("id"));
+      console.log(LoginData);
+      // 로그인 vlaue값 추가
+      if (!LoginData) {
+        localStorage.setItem("id", JSON.stringify([action.data]));
+        return {
+          datainfo: [],
+          userId: id,
+          isLogin: true,
+        };
+        // localstorage값이 비어져있을때 처음 값 입력
+      }
+      // localstorage에 값이 있는 상태
+      else if (LoginData) {
+        let LoginFilterData = LoginData.filter((it) => it.id === id);
+        // 같은 값이면 데이터가 한개라도 있을거고
+        // 같은 값이 없으면 로그인데이터가 한개라도 없을거다.
+        console.log(id, password, LoginFilterData[0].password);
+
+        if (LoginFilterData.length !== 0) {
+          // localStorage에 같은 값이 있는 상태
+          let LoginFilterDataFirstObj = LoginFilterData.shift();
+          if (LoginFilterDataFirstObj.password === password) {
+            return {
+              datainfo: LoginFilterDataFirstObj ? LoginFilterDataFirstObj : [],
+              userId: id,
+              isLogin: true,
+            };
+          } else {
+            alert("비밀번호가 틀렸습니다.");
+            return state;
+          }
+        } else if (LoginFilterData.length === 0) {
+          // localStorage에 같은 값이 없는 상태
+          LoginData.push(action.data);
+          localStorage.removeItem("id");
+          localStorage.setItem("id", JSON.stringify(LoginData));
         }
       }
 
-      localStorage.setItem(id, JSON.stringify(action.data));
+      // if (LoginData) {
+      //
+
+      //   if (LoginFilterData.id === id) {
+      //     if (LoginFilterData.password === password) {
+      //       const memberDatas = LoginFilterData.contents;
+      //       return {
+      //         datainfo: memberDatas ? memberDatas : [],
+      //         userId: id,
+      //         isLogin: true,
+      //       };
+      //     } else {
+      //       alert("비밀번호가 틀렸습니다.");
+      //       return state;
+      //     }
+      //   }
+      // }
+
+      // [{ id: "tt", password: "xx", contents: Array(1) }]; // localstorage구조
       return {
-        ...state,
+        datainfo: [],
         userId: id,
-        dataId: 1,
-        isLogin: !state.isLogin,
+        isLogin: true,
       };
     }
 
@@ -51,12 +94,21 @@ const reducer = (state, action) => {
         created_date,
         Nickname,
       };
-      const dataArray = JSON.parse(localStorage.getItem(state.userId)) || [];
-      dataArray.contents.push(newItem);
-      localStorage.setItem(state.userId, JSON.stringify(dataArray));
+      let dataArray = JSON.parse(localStorage.getItem("id"));
+      let LoginFilterData = dataArray.filter((it) => it.id === Nickname);
+      console.log(LoginFilterData);
+      //로그인 아이디랑 같은 값을 들고와서
+      LoginFilterData[0].contents.push(newItem);
+      // 거기에 값을 넣고
+      dataArray = dataArray.filter((it) => it.id !== state.id);
+      // 로그인내에 기존에 있던 값을 삭제하고
+      dataArray.push(LoginFilterData);
+
+      localStorage.setItem("id", JSON.stringify(dataArray));
+
       return {
         ...state,
-        datainfo: [newItem, ...state.datainfo],
+        datainfo: LoginFilterData,
       };
     }
     case "Delete": {
@@ -105,7 +157,7 @@ const App = () => {
     userId: "",
     isLogin: false,
   });
-
+  console.log(data);
   // 로그인 구현
   // const user = useMemo(() => {
   //   return { ...data };
@@ -113,14 +165,14 @@ const App = () => {
   const OnLogin = (loginObj) => {
     dispatch({ type: "OnLogin", data: loginObj });
   };
-  const getIdate = JSON.parse(localStorage.getItem(data));
-  console.log(data);
-  useEffect(() => {
-    if (data) {
-      dispatch({ type: "IdInfo" });
-      console.log("실행");
-    }
-  }, []);
+  // const getIdate = JSON.parse(localStorage.getItem(data));
+  // console.log(data);
+  // useEffect(() => {
+  //   if (data) {
+  //     dispatch({ type: "IdInfo" });
+  //     console.log("실행");
+  //   }
+  // }, []);
 
   const onLogout = () => {
     dispatch({ type: "toggleLogin" });
@@ -151,17 +203,19 @@ const App = () => {
     return { onCreate, onDelete, onEdit, onLogout, OnLogin };
   }, []);
 
-  const getDiaryAnalysis = useMemo(() => {
-    if (!data.datainfo) {
-      return null;
-    }
-    const goodCount = data.datainfo.filter((it) => it.emotion >= 3).length;
-    const badCount = data.datainfo.length - goodCount;
-    const goodRatio = (goodCount / data.datainfo.length) * 100;
-    return { goodCount, badCount, goodRatio };
-  }, [data.datainfo]);
+  // const getDiaryAnalysis = useMemo(() => {
+  //   if (!data.datainfo) {
+  //     return null;
+  //   }
+  //   const goodCount = data.datainfo.contents.filter(
+  //     (it) => it.emotion >= 3
+  //   ).length;
+  //   const badCount = data.datainfo.contents.length - goodCount;
+  //   const goodRatio = (goodCount / data.datainfo.contents.length) * 100;
+  //   return { goodCount, badCount, goodRatio };
+  // }, [data.datainfo]);
 
-  const { goodCount, badCount, goodRatio } = getDiaryAnalysis || {};
+  // const { goodCount, badCount, goodRatio } = getDiaryAnalysis || {};
 
   return (
     <DiaryStateContext.Provider value={data}>
@@ -173,10 +227,10 @@ const App = () => {
               <Login />
 
               <DiaryEditor />
-              <div>전체 일기 : {data.datainfo.length} </div>
+              {/* <div>전체 일기 : {data.datainfo.length} </div>
               <div>기분 좋은 일기 개수 : {goodCount} </div>
               <div>기분 나쁜 일기 개수 : {badCount} </div>
-              <div>기분 좋은 일기 비율 : {goodRatio || 0}</div>
+              <div>기분 좋은 일기 비율 : {goodRatio || 0}</div> */}
               <DiaryList />
             </>
           )}
