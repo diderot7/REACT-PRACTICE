@@ -4,6 +4,7 @@ import React, {
   useMemo,
   useCallback,
   useReducer,
+  useState,
 } from "react";
 
 import "./App.css";
@@ -21,14 +22,13 @@ const reducer = (state, action) => {
       // 그게 아니라면 그냥 값 전다
       const { id, password } = action.data;
       const LoginData = JSON.parse(localStorage.getItem("id"));
-      console.log(LoginData);
       // 로그인 vlaue값 추가
       if (!LoginData) {
         localStorage.setItem("id", JSON.stringify([action.data]));
+        const FirstData = JSON.parse(localStorage.getItem("id"));
         return {
           datainfo: [],
           userId: id,
-          isLogin: true,
         };
         // localstorage값이 비어져있을때 처음 값 입력
       }
@@ -37,7 +37,6 @@ const reducer = (state, action) => {
         let LoginFilterData = LoginData.filter((it) => it.id === id);
         // 같은 값이면 데이터가 한개라도 있을거고
         // 같은 값이 없으면 로그인데이터가 한개라도 없을거다.
-        console.log(id, password, LoginFilterData[0].password);
 
         if (LoginFilterData.length !== 0) {
           // localStorage에 같은 값이 있는 상태
@@ -46,7 +45,6 @@ const reducer = (state, action) => {
             return {
               datainfo: LoginFilterDataFirstObj ? LoginFilterDataFirstObj : [],
               userId: id,
-              isLogin: true,
             };
           } else {
             alert("비밀번호가 틀렸습니다.");
@@ -54,37 +52,17 @@ const reducer = (state, action) => {
           }
         } else if (LoginFilterData.length === 0) {
           // localStorage에 같은 값이 없는 상태
-          LoginData.push(action.data);
+          LoginData.unshift(action.data);
           localStorage.removeItem("id");
           localStorage.setItem("id", JSON.stringify(LoginData));
+          return {
+            datainfo: [],
+            userId: id,
+          };
         }
       }
-
-      // if (LoginData) {
-      //
-
-      //   if (LoginFilterData.id === id) {
-      //     if (LoginFilterData.password === password) {
-      //       const memberDatas = LoginFilterData.contents;
-      //       return {
-      //         datainfo: memberDatas ? memberDatas : [],
-      //         userId: id,
-      //         isLogin: true,
-      //       };
-      //     } else {
-      //       alert("비밀번호가 틀렸습니다.");
-      //       return state;
-      //     }
-      //   }
-      // }
-
-      // [{ id: "tt", password: "xx", contents: Array(1) }]; // localstorage구조
-      return {
-        datainfo: [],
-        userId: id,
-        isLogin: true,
-      };
     }
+    // 로그인 구현 완료
 
     case "CREATE": {
       const created_date = new Date().getTime();
@@ -94,30 +72,41 @@ const reducer = (state, action) => {
         created_date,
         Nickname,
       };
-      let dataArray = JSON.parse(localStorage.getItem("id"));
-      let LoginFilterData = dataArray.filter((it) => it.id === Nickname);
-      console.log(LoginFilterData);
-      //로그인 아이디랑 같은 값을 들고와서
-      LoginFilterData[0].contents.push(newItem);
-      // 거기에 값을 넣고
-      dataArray = dataArray.filter((it) => it.id !== state.id);
-      // 로그인내에 기존에 있던 값을 삭제하고
-      dataArray.push(LoginFilterData);
+      let dataArray = JSON.parse(localStorage.getItem("id")); // 로컬스토리지에서 모든 값 가져오고
+      let LoginFilterData = dataArray.filter((it) => it.id === state.userId);
 
+      // const dataInfo = data.datainfo;
+      // const dataInfoContent = dataInfo.contents || [];
+
+      LoginFilterData[0].contents.push(newItem);
+      const ObjLoginFilterData = LoginFilterData[0];
+
+      // const key1Values = array.map(obj => obj.key1);
+
+      // 거기에 값을 넣고
+      dataArray = dataArray.filter((it) => it.id !== state.userId);
+
+      // 로그인내에 기존에 있던 값을 삭제하고
+
+      dataArray.unshift(ObjLoginFilterData);
       localStorage.setItem("id", JSON.stringify(dataArray));
 
       return {
-        ...state,
+        userId: state.userId,
         datainfo: LoginFilterData,
       };
     }
     case "Delete": {
+      console.log(state.datainfo, action.data);
       return {
         ...state,
         datainfo: state.datainfo.filter((it) => it.id !== action.targetId),
       };
     }
     case "EDIT": {
+      const ids = state.userId;
+      const dataArr = state.datainfo;
+      console.log(ids, dataArr);
       return {
         ...state,
         datainfo: state.datainfo.map((it) =>
@@ -130,21 +119,17 @@ const reducer = (state, action) => {
         ),
       };
     }
-    case "IdInfo": {
+    case "InfoUse": {
+      console.log(action.data);
+      const { FirstData, FirstId } = action.data;
+      console.log(FirstData, FirstId);
       return {
-        ...state,
-        isLogin: true,
+        userId: FirstId,
+        datainfo: [FirstData],
       };
     }
-    case "toggleLogin": {
-      return {
-        ...state,
-        isLogin: !state.isLogin,
-      };
-    }
-
-    // default:
-    //   return state;
+    default:
+      return state;
   }
 };
 
@@ -155,27 +140,27 @@ const App = () => {
   const [data, dispatch] = useReducer(reducer, {
     datainfo: [],
     userId: "",
-    isLogin: false,
   });
-  console.log(data);
+
+  const [isLogin, setIsLogin] = useState(false);
   // 로그인 구현
-  // const user = useMemo(() => {
-  //   return { ...data };
-  // }, [data.datainfo]);
+  useEffect(() => {
+    if (localStorage.getItem("id")) {
+      const Data = JSON.parse(localStorage.getItem("id"));
+      const FirstData = Data[0];
+      const FirstId = FirstData.id;
+      console.log(FirstData, FirstId);
+      setIsLogin(true);
+      dispatch({ type: "InfoUse", data: { FirstData, FirstId } });
+    }
+  }, []);
   const OnLogin = (loginObj) => {
     dispatch({ type: "OnLogin", data: loginObj });
+    setIsLogin(!isLogin);
   };
-  // const getIdate = JSON.parse(localStorage.getItem(data));
-  // console.log(data);
-  // useEffect(() => {
-  //   if (data) {
-  //     dispatch({ type: "IdInfo" });
-  //     console.log("실행");
-  //   }
-  // }, []);
 
   const onLogout = () => {
-    dispatch({ type: "toggleLogin" });
+    setIsLogin(false);
   };
 
   const dataId = useRef(1);
@@ -191,11 +176,12 @@ const App = () => {
     dispatch({ type: "Delete", targetId });
   }, []);
 
-  const onEdit = useCallback((targetId, newContent) => {
+  const onEdit = useCallback((targetId, newContent, Nickname) => {
     dispatch({
       type: "EDIT",
       targetId,
       newContent,
+      Nickname,
     });
   }, []);
 
@@ -222,10 +208,9 @@ const App = () => {
       <DiaryDispatchContext.Provider value={memoizedDispatches}>
         <div className="App">
           <Title />
-          {data.isLogin && (
+          {isLogin && (
             <>
               <Login />
-
               <DiaryEditor />
               {/* <div>전체 일기 : {data.datainfo.length} </div>
               <div>기분 좋은 일기 개수 : {goodCount} </div>
@@ -234,7 +219,7 @@ const App = () => {
               <DiaryList />
             </>
           )}
-          {!data.isLogin && <Logout />}
+          {!isLogin && <Logout />}
         </div>
       </DiaryDispatchContext.Provider>
     </DiaryStateContext.Provider>
