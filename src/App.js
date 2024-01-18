@@ -97,32 +97,40 @@ const reducer = (state, action) => {
       };
     }
     case "Delete": {
-      console.log(state.datainfo, action.data);
+      const dataArr = state.datainfo;
+      const dataArrContents = dataArr[0].contents;
+      const newFilterData = dataArrContents.filter(
+        (it) => it.id !== action.targetId
+      );
+      const LoginData = JSON.parse(localStorage.getItem("id"));
+      LoginData[0].contents = newFilterData;
+      console.log(newFilterData, LoginData);
       return {
-        ...state,
-        datainfo: state.datainfo.filter((it) => it.id !== action.targetId),
+        userId: state.userId,
+        datainfo: LoginData,
       };
     }
     case "EDIT": {
-      const ids = state.userId;
       const dataArr = state.datainfo;
-      console.log(ids, dataArr);
+      const dataArrContents = dataArr[0].contents;
+      const newEditData = dataArrContents.map((it) =>
+        it.id === action.targetId
+          ? {
+              ...it,
+              content: action.newContent,
+            }
+          : it
+      );
+      const LoginData = JSON.parse(localStorage.getItem("id"));
+      LoginData[0].contents = newEditData;
+
       return {
-        ...state,
-        datainfo: state.datainfo.map((it) =>
-          it.id === action.targetId
-            ? {
-                ...it,
-                content: action.newContent,
-              }
-            : it
-        ),
+        userId: state.userId,
+        datainfo: LoginData,
       };
     }
     case "InfoUse": {
-      console.log(action.data);
       const { FirstData, FirstId } = action.data;
-      console.log(FirstData, FirstId);
       return {
         userId: FirstId,
         datainfo: [FirstData],
@@ -149,7 +157,6 @@ const App = () => {
       const Data = JSON.parse(localStorage.getItem("id"));
       const FirstData = Data[0];
       const FirstId = FirstData.id;
-      console.log(FirstData, FirstId);
       setIsLogin(true);
       dispatch({ type: "InfoUse", data: { FirstData, FirstId } });
     }

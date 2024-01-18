@@ -7,7 +7,6 @@ const DiaryItem = ({ content, emotion, id, created_date, Nickname }) => {
   const [isEdit, setIsEdit] = useState(false);
   const toggleIsEdit = () => setIsEdit(!isEdit);
   const [localContent, setLocalContent] = useState(content);
-  console.log(localContent);
 
   // console.log(isEdit);
   const handleRemove = () => {
